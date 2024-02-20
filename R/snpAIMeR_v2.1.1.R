@@ -1,19 +1,20 @@
 #' @title Assess the Diagnostic Power of Genomic Marker Combinations
 #'
 #' @description
-#' Population genetics package for designing diagnostic panels. Candidate
-#' markers, marker combinations, and different panel sizes are assessed for how
+#' Population genetics package for optimizing diagnostic panels. User-selected
+#' candidate markers are assessed individually and in combination for how
 #' well they can predict the source population of known samples. Requires a
-#' genotype file of candidate markers in STRUCTURE format.
+#' genotype file in STRUCTURE format.
 #'
-#' @param run_mode Modes are "interactive" or "non-interactive"; must be in quotes.
+#' @param run_mode Modes are "interactive", "non-interactive", or "example"; mode
+#' must be in quotes.
 #' @param config_file Yaml file required for "non-interactive" mode; filename/path
 #' must be in quotes.
 #' @param verbose Default is TRUE.
 #'
-#' @return Average correct cross-validation assignment rates for individual
-#' markers, marker combinations, and panel sizes. Outputs three .csv and two
-#' .pdf files to a user-specified directory.
+#' @return Cross-validation assignment rates for individual markers, marker
+#' combinations, and panel sizes. Outputs three .csv and two .pdf files to a
+#' user-specified directory.
 #' @export
 #'
 #' @importFrom magrittr %>%
@@ -31,11 +32,10 @@
 #'   \item number_of_individuals: <same as adegenet's "n.ind">
 #'   \item number_of_loci: <same as adegenet's "n.loc">
 #'   \item one_data_row_per_individual: <TRUE or FALSE>
-#'   \item column_sample_IDs: <column number with individual sample names>
-#'   \item column_population_assignments: <column number with population
-#'   assignment>
+#'   \item column_sample_IDs: <column number>
+#'   \item column_population_assignments: <column number>
 #'   \item column_other_info: <column number>
-#'   \item row_markernames: <row number with marker names>
+#'   \item row_markernames: <row number>
 #'   \item no_genotype_character: <default is "-9">
 #'   \item optional_population_info: <optional>
 #'   \item genotype_character_separator: <optional>
@@ -45,11 +45,10 @@
 #' recommend testing no more than 15 markers. For example, testing 15 markers
 #' in panel sizes of 1 to 15 (32,767 total combinations) with 1,000
 #' cross-validation replicates on a system with 48 processor cores took about 5
-#' hours and 20 GB RAM. Reducing the number of cross-validation replicates also
-#' reduces run time, however, we recommend no less than 100 replicates.
+#' hours and 20 GB RAM. Reducing the number of cross-validation replicates will
+#' reduce run time, however, we recommend no less than 100 replicates.
 #'
 #' @examples
-#' # In "example" mode only the individual marker assignment rate plot is generated.
 #' if (requireNamespace("adegenet", quietly = TRUE)) {
 #'   data(nancycats, package = "adegenet")
 #'   snpAIMeR("example", verbose = TRUE)
@@ -64,10 +63,10 @@ snpAIMeR <- function(run_mode, config_file = NULL, verbose = TRUE) {
   # Set up parallelization
   chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
   if ((nzchar(chk) && chk == "TRUE") || run_mode == "example") {
-    # CRAN limits packages to 2 cores
+    # CRAN testing limits package examples to 2 cores
     n.cores <- 2L
   } else {
-    # Setup backend to use many processors
+    # Setup backend to use multiple processors
     if (verbose == TRUE) {
       cat(parallel::detectCores(), "cores detected\n")
     }
@@ -131,19 +130,19 @@ snpAIMeR <- function(run_mode, config_file = NULL, verbose = TRUE) {
   	  cv_replicates <- as.integer(readline(prompt = "Number of cross-validation replicates: "))
   } else if (run_mode == "example") {
       # pop_data variable is replaced with nancycats
-      # nancycats dataset is reduced from 9 to 5 markers
-      nancycats_5_markers <- nancycats[,loc=c("fca8", "fca23", "fca43", "fca45", "fca77")]
-      loci = adegenet::locNames(nancycats_5_markers)
+      # nancycats dataset is reduced from 9 to 3 markers
+      nancycats_3_markers <- nancycats[,loc=c("fca8", "fca23", "fca43")]
+      loci = adegenet::locNames(nancycats_3_markers)
       cat("Data file contains", length(loci), "markers\n")
       cat("File contains the following group definitions:")
       print(table(nancycats@pop))
 
       min_loc_num <- as.integer(1)
-      max_loc_num <- as.integer(1)
+      max_loc_num <- as.integer(3)
       assignment_rate_threshold <- as.double(0.9)
       cv_replicates <- as.integer(5)
   } else {
-      stop('\nError: invalid run_mode. Options are "interactive" or "non-interactive".\n')
+      stop('\nError: invalid run_mode\n')
   }
 
   if (run_mode != "example") {
@@ -255,7 +254,9 @@ snpAIMeR <- function(run_mode, config_file = NULL, verbose = TRUE) {
 	    ggplot2::scale_x_continuous(breaks = seq(round(max(combination_mean_df$panel_size),0))) +
 	    ggplot2::labs(title = "Panel sizes", x = "Number of markers in combination", y = "Average assignment rate") +
 	    ggplot2::theme_light()
-	   suppressMessages(ggplot2::ggsave("Panel_size_assign_rate.pdf"))
+	   if (run_mode != "example"){
+	     suppressMessages(ggplot2::ggsave("Panel_size_assign_rate.pdf"))
+	   }
 	   if (verbose == TRUE) {
 	     print(combination_means)
 	   }

@@ -1,7 +1,7 @@
 Type: Package
 Package: snpAIMeR
 Title: Assess the Diagnostic Power of Genomic Marker Combinations
-Version: 2.1.0
+Version: 2.1.1
 Authors@R: c(
     person("Kim", "Vertacnik", , "kim.vertacnik@mailbox.org", role = c("cre", "aut"),
            comment = c(ORCID = "0009-0006-7097-5091")),
@@ -26,12 +26,12 @@ Imports: adegenet, doParallel, dplyr, forcats, foreach, ggplot2,
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 NeedsCompilation: no
-Packaged: 2023-12-15 22:10:45 UTC; kimvertacnik
+Packaged: 2024-02-20 20:01:29 UTC; kim
 Author: Kim Vertacnik [cre, aut] (<https://orcid.org/0009-0006-7097-5091>),
   Oksana Vernygora [aut] (<https://orcid.org/0000-0001-6444-3888>),
   Julian Dupuis [aut] (<https://orcid.org/0000-0002-6989-9179>)
 Maintainer: Kim Vertacnik <kim.vertacnik@mailbox.org>
 Repository: CRAN
-Date/Publication: 2023-12-17 08:00:02 UTC
+Date/Publication: 2024-02-20 20:20:02 UTC
